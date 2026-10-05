@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Algoritmo Musical Binário</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎹 Algoritmo Musical Binário</h1>
+    <p class="lede">Uma sequência de 0 e 1 vira uma semente. A semente gera números pelo Fibonacci personalizado. Cada número vira nota e ritmo.</p>
+    <div class="hands">
+      <span class="tag h1">Primeira mão · evolução</span>
+      <span class="tag h2">Segunda mão · estabilidade</span>
+    </div>
+  </header>
+
+  <section class="panel" aria-labelledby="t-entrada">
+    <h2 id="t-entrada">Entrada</h2>
+    <div class="input-row">
+      <input type="text" id="binInput" value="" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="Sequência binária" placeholder="Digite seu binário, só 0 e 1 (ex.: 1011)">
+    </div>
+    <div class="transport" role="group" aria-label="Controles">
+      <button class="btn primary" id="btnGen" type="button">GERAR</button>
+      <button class="btn" id="btnPlay" type="button">TOCAR</button>
+      <button class="btn" id="btnPause" type="button" disabled>PAUSAR</button>
+      <button class="btn" id="btnStop" type="button">PARAR</button>
+      <button class="btn" id="btnRestart" type="button">REINICIAR</button>
+    </div>
+    <p class="error" id="error" role="alert"></p>
+    <p class="status" id="status" aria-live="polite"></p>
+    <p class="hint" id="audioNote"></p>
+    <dl class="seed">
+      <div><dt>binarySeed</dt><dd id="seedBin"></dd></div>
+      <div><dt>numericSeed</dt><dd id="seedDec"></dd></div>
+      <div><dt>bits</dt><dd id="seedBits"></dd></div>
+    </dl>
+    <div class="piano" aria-label="As 12 notas (número mod 12). Toque numa tecla para ouvir.">
+      <div class="white-row" id="whiteRow"></div>
+    </div>
+    <p class="octaves" id="octaves"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="t-mao1">
+    <h2 id="t-mao1">Primeira mão: da semente às notas</h2>
+    <p class="hint">O Algoritmo 1 só produz números. O mod 12 escolhe a nota. O binário de cada número decide a duração: uns consecutivos no início valem 1 segundo cada, e o primeiro 0 encerra a contagem.</p>
+    <div class="flow" id="flow1"></div>
+    <div class="tablewrap" id="tableWrap">
+      <table>
+        <thead><tr><th>#</th><th>Número</th><th>Binário</th><th>mod 12</th><th>Nota</th><th>Duração</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="more-row">
+      <button class="btn" id="btnMore" type="button">MOSTRAR MAIS</button>
+      <span class="hint">As linhas são calculadas sob demanda. Durante a execução, a tabela acompanha a música. Uns iniciais ficam destacados.</span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-mao2">
+    <h2 id="t-mao2">Segunda mão: da semente original aos zeros</h2>
+    <p class="hint">Calculada uma única vez, só com a semente original. Não acompanha o Fibonacci.</p>
+    <div class="flow" id="flow2"></div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-param">
+    <h2 id="t-param">Parâmetros</h2>
+    <p class="hint">Os itens marcados como "em aberto" ainda não têm regra definida. Cada um fica isolado em uma única função ou configuração no código.</p>
+    <div class="settings">
+      <div class="field"><label for="cfgEvents">Eventos da primeira mão (0 = contínuo)</label><input type="number" id="cfgEvents" min="0" max="2000" value="32"></div>
+      <div class="field"><label for="cfgTempo">Andamento <span class="open-tag">em aberto</span> <output id="outTempo">×1</output></label><input type="range" id="cfgTempo" min="0.5" max="3" step="0.25" value="1"></div>
+      <div class="field"><label for="cfgOct1">Oitava da primeira mão (1 a 7) <span class="open-tag">em aberto</span></label>
+        <select id="cfgOct1"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option></select></div>
+      <div class="field"><label for="cfgOct2">Oitava da segunda mão (1 a 7) <span class="open-tag">em aberto</span></label>
+        <select id="cfgOct2"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
+      <div class="field"><label for="cfgWave1">Timbre da primeira mão <span class="open-tag">em aberto</span></label>
+        <select id="cfgWave1"><option value="piano" selected>Piano (gravações reais)</option><option value="sine">Senoide</option><option value="triangle">Triangular</option><option value="square">Quadrada</option><option value="sawtooth">Dente de serra</option></select></div>
+      <div class="field"><label for="cfgWave2">Timbre da segunda mão <span class="open-tag">em aberto</span></label>
+        <select id="cfgWave2"><option value="piano" selected>Piano (gravações reais)</option><option value="sine">Senoide</option><option value="triangle">Triangular</option><option value="square">Quadrada</option><option value="sawtooth">Dente de serra</option></select></div>
+      <div class="field"><label for="cfgVol">Volume geral <span class="open-tag">em aberto</span></label><input type="range" id="cfgVol" min="0" max="100" value="70"></div>
+      <div class="field"><label for="cfgVol2">Volume da segunda mão <span class="open-tag">em aberto</span></label><input type="range" id="cfgVol2" min="0" max="100" value="60"></div>
+      <div class="field"><label for="cfgBeat">Duração de um tempo da segunda mão, em s <span class="open-tag">em aberto</span></label><input type="number" id="cfgBeat" min="0.1" max="4" step="0.05" value="0.5"></div>
+      <div class="field"><label for="cfgRule2">Regra da segunda mão <span class="open-tag">em aberto</span></label><select id="cfgRule2"></select></div>
+      <div class="field check"><input type="checkbox" id="cfgChordConsume"><label for="cfgChordConsume">Acorde consome os dois números seguintes <span class="open-tag">em aberto</span></label></div>
+    </div>
+    <ul class="rules">
+      <li>Fixo: Fibonacci personalizado, nota = número mod 12, notas repetidas mantidas, uns depois do primeiro 0 não contam, sem aleatoriedade, acorde só com mais de 4 uns iniciais.</li>
+      <li>Em aberto: como zeros viram notas, como espaçamentos viram duração, como preencher os 4 tempos, oitavas, instrumentos, dinâmica, andamento, sincronização da segunda mão e dos acordes.</li>
+      <li>No acorde, a duração das três notas é a da nota atual, já que a regra não define as outras.</li>
+      <li>Mudar a regra da segunda mão ou o acorde gera a composição de novo.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>12 notas · mod 12 · temperamento igual, Lá4 = 440 Hz</span>
+    <span>Amostras de piano do projeto <a href="https://github.com/nbrosowsky/tonejs-instruments" target="_blank" rel="noopener">tonejs-instruments</a>, licença CC BY 3.0.</span>
+  </footer>
+</div>
+
+<script src="piano-samples.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
